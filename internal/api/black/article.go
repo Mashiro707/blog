@@ -6,6 +6,7 @@ import (
 	"blog/pkg/code"
 	"blog/pkg/msg"
 	"blog/pkg/request"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -63,7 +64,12 @@ func GetArticleByID(c *gin.Context) {
 }
 
 func ArticleList(c *gin.Context) {
-	res, err := black.ArticleList()
+	var params request.Pagination
+	if err := c.ShouldBindJSON(&params); err != nil {
+		app.Error(c, code.ParamsNotValid, msg.ParamsNotValid)
+		return
+	}
+	res, err := black.ArticleList(&params)
 	if err != nil {
 		app.Error(c, code.DBGetError, msg.DBGetError)
 		return

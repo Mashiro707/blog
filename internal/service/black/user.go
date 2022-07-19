@@ -3,27 +3,29 @@ package black
 import (
 	"blog/internal/model"
 	"blog/pkg/common/auth"
+	"blog/pkg/common/bcrypt"
 	"blog/pkg/mysql"
 	"blog/pkg/redis"
 	"blog/pkg/request"
 	"blog/pkg/response"
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func UserLogin(c *gin.Context, params request.UserLogin) (response.UserInfoWithToken, error) {
-	var err error
 	var userModel model.User
 	if err := mysql.DB.Table(userModel.TableName()).
 		Where("user_name = ? AND deleted = 0", params.UserName).
 		Scan(&userModel).Error; err != nil {
 		return response.UserInfoWithToken{}, err
 	}
-	if userModel.Password != params.Password {
+	if bool := bcrypt.PasswordVerify(params.Password, userModel.Password); !bool {
 		return response.UserInfoWithToken{}, errors.New("密码错误")
 	}
+
 	// 生成token
 	token, err := auth.CreateToken(params)
 	if err != nil {
@@ -33,9 +35,22 @@ func UserLogin(c *gin.Context, params request.UserLogin) (response.UserInfoWithT
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	redis.RedisClient.Set(ctx, params.UserName, token, 7*24*time.Hour)
 	defer cancel()
+
 	res := response.UserInfoWithToken{
-		User:  userModel,
-		Token: token,
+		UserInfo: *conv(&userModel),
+		Token:    token,
 	}
 	return res, err
+}
+
+func conv(user *model.User) *response.UserInfo {
+	return &response.UserInfo{
+		ID:          user.ID,
+		UserName:    user.UserName,
+		NickName:    user.NickName,
+		Email:       user.Email,
+		Avatar:      user.Avatar,
+		CreatedTime: user.CreatedTime.Unix(),
+		UpdatedTime: user.UpdatedTime.Unix(),
+	}
 }

@@ -12,7 +12,7 @@ func CreateCategory(c *gin.Context, params request.CreateCategoryRequest) (err e
 	var (
 		categoryModel model.Category
 	)
-	if err = mysql.DB.Table(categoryModel.TableName()).Create(model.Category{
+	if err = mysql.DB.Table(categoryModel.TableName()).Create(&model.Category{
 		Name: params.Name,
 	}).Error; err != nil {
 		zap.ErrorLog(err)

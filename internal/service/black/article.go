@@ -2,6 +2,7 @@ package black
 
 import (
 	"blog/internal/model"
+	common "blog/pkg/common/gorm"
 	"blog/pkg/mysql"
 	"blog/pkg/request"
 	"blog/pkg/response"
@@ -12,8 +13,6 @@ import (
 
 func CreateArticle(c *gin.Context, params request.CreateArticle) (err error) {
 	var articleModel model.Article
-	var articleTagRelationModel model.ArticleTagRelation
-	var articleTagRelationArray []model.ArticleTagRelation
 	article := model.Article{
 		Title:       params.Title,
 		Cover:       params.Cover,
@@ -28,23 +27,11 @@ func CreateArticle(c *gin.Context, params request.CreateArticle) (err error) {
 		zap.ErrorLog(err)
 		return err
 	}
-	// 维护文章标签表
-	for _, tagID := range params.Tags {
-		articleTagRelationArray = append(articleTagRelationArray, model.ArticleTagRelation{
-			ArticleID: article.ID,
-			TagID:     tagID,
-		})
-	}
-	if err = mysql.DB.Table(articleTagRelationModel.TableName()).Create(&articleTagRelationArray).Error; err != nil {
-		zap.ErrorLog(err)
-		return err
-	}
 	return nil
 }
 
 func UpdateArticle(c *gin.Context, params request.UpdateArticle) (err error) {
 	var articleModel model.Article
-	var articleTagRelationModel model.ArticleTagRelation
 	articleTagRelationMap := map[string]interface{}{
 		"title":       params.Title,
 		"cover":       params.Cover,
@@ -61,51 +48,14 @@ func UpdateArticle(c *gin.Context, params request.UpdateArticle) (err error) {
 		zap.ErrorLog(err)
 		return err
 	}
-	// 判断标签是否更新，如果需要更新标签则需要删除原来所有标签再新增新的数据
-	if len(params.Tags) == 0 {
-		return nil
-	} else {
-		// delete tags
-		if err = mysql.DB.Table(articleTagRelationModel.TableName()).
-			Where("article_id = ? AND deleted = 0", params.ID).
-			Updates(map[string]int{
-				"deleted": 1,
-			}).Error; err != nil {
-			zap.ErrorLog(err)
-			return err
-		}
-		// 维护文章标签表
-		var articleTagRelationArray []model.ArticleTagRelation
-		for _, tagID := range params.Tags {
-			articleTagRelationArray = append(articleTagRelationArray, model.ArticleTagRelation{
-				ArticleID: params.ID,
-				TagID:     tagID,
-			})
-		}
-		if err = mysql.DB.Table(articleTagRelationModel.TableName()).
-			Create(&articleTagRelationArray).Error; err != nil {
-			zap.ErrorLog(err)
-			return err
-		}
-	}
 	return nil
 }
 
 func DeleteArticle(c *gin.Context, params request.DeleteArticle) (err error) {
 	var articleModel model.Article
-	var articleTagRelationModel model.ArticleTagRelation
 	// 维护文章表
 	if err = mysql.DB.Table(articleModel.TableName()).
 		Where("id = ? AND deleted = 0", params.ID).
-		Updates(map[string]int{
-			"deleted": 1,
-		}).Error; err != nil {
-		zap.ErrorLog(err)
-		return err
-	}
-	// 维护文章标签表
-	if err = mysql.DB.Table(articleTagRelationModel.TableName()).
-		Where("article_id = ? AND deleted = 0", params).
 		Updates(map[string]int{
 			"deleted": 1,
 		}).Error; err != nil {
@@ -120,25 +70,44 @@ func GetArticleByID(param request.GetArticleByID) (articleDetail response.Articl
 		articleModel model.Article
 	)
 	if err = mysql.DB.Table(articleModel.TableName()).
-		Select("article.title, article.cover, article.content, article.is_top, article.is_comment, article.category_id, category.name category_name").
+		Select("article.title, article.cover, article.content, article.description, article.is_top, article.is_comment, article.category_id, category.name category_name").
 		Joins("join category on category.id = article.category_id").
-		Where("id = ? AND deleted = 0", param.ID).Scan(&articleDetail).Error; err != nil {
+		Where("article.id = ? AND article.deleted = 0", param.ID).Scan(&articleDetail).Error; err != nil {
 		zap.ErrorLog(err)
 		return articleDetail, err
 	}
 	return articleDetail, nil
 }
 
-func ArticleList() (articleList []response.ArticleList, err error) {
+func ArticleList(params *request.Pagination) (articleList []response.ArticleList, err error) {
 	var (
-		articleModel model.Article
+		articleModel     model.Article
+		articleInfoArray []model.ArticleInfo
 	)
 	if err = mysql.DB.Table(articleModel.TableName()).
-		Select("article.id, article.title, article.cover, article.content, article.is_top, article.is_comment, article.category_id, category.name category_name, article.created_at, article.update_at").
+		Select("article.id, article.title, article.cover, article.content, article.is_top, article.is_comment, article.category_id, category.name category_name, article.created_time, article.updated_time").
 		Joins("join category on category.id = article.category_id").
-		Where("deleted = 0").Scan(&articleList).Error; err != nil {
+		Scopes(common.Paginate(params.PageNum, params.PageSize)).
+		Where("article.deleted = 0").Scan(&articleInfoArray).Error; err != nil {
 		zap.ErrorLog(err)
 		return articleList, err
 	}
+	for _, v := range articleInfoArray {
+		articleList = append(articleList, *convArticle(&v))
+	}
 	return articleList, nil
+}
+
+func convArticle(articleInfo *model.ArticleInfo) *response.ArticleList {
+	return &response.ArticleList{
+		ID:           articleInfo.ID,
+		Title:        articleInfo.Title,
+		Status:       articleInfo.Status,
+		IsTop:        articleInfo.IsTop,
+		IsComment:    articleInfo.IsComment,
+		CategoryID:   articleInfo.CategoryID,
+		CategoryName: articleInfo.CategoryName,
+		CreatedTime:  articleInfo.CreatedTime.Unix(),
+		UpdatedTime:  articleInfo.UpdatedTime.Unix(),
+	}
 }

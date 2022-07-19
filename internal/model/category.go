@@ -1,14 +1,14 @@
 package model
 
 type Category struct {
-	ID      int    `gorm:"column:id;type:int(11);AUTO_INCREMENT;primary_key" json:"id"`
+	ID      int64  `gorm:"column:id;type:bigint(20);AUTO_INCREMENT;primary_key" json:"id"`
 	Name    string `gorm:"column:name;type:varchar(64);NOT NULL" json:"name"`
-	Deleted int    `gorm:"column:deleted;type:tinyint(4);default:0;NOT NULL" json:"deleted"`
+	Deleted int64  `gorm:"column:deleted;type:tinyint(4);default:0;NOT NULL" json:"deleted"`
 	TimeModel
 }
 
 type CategoryInfo struct {
-	ID   int    `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
