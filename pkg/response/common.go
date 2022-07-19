@@ -1,8 +1,6 @@
 package response
 
-import "time"
-
 type TimeModel struct {
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedTime int64 `json:"created_time"`
+	UpdatedTime int64 `json:"updated_time"`
 }

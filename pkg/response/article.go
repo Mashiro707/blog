@@ -1,14 +1,15 @@
 package response
 
 type ArticleList struct {
-	ID           int    `json:"id"`
+	ID           int64  `json:"id"`
 	Title        string `json:"title"`
-	Cover        string `json:"cover"`
+	Status       int8   `json:"status"`
 	IsTop        int8   `json:"is_top"`
 	IsComment    int8   `json:"is_comment"`
-	CategoryID   int    `json:"category_id"`
+	CategoryID   int64  `json:"category_id"`
 	CategoryName string `json:"category_name"`
-	TimeModel
+	CreatedTime  int64  `json:"created_time"`
+	UpdatedTime  int64  `json:"updated_time"`
 }
 
 type ArticleDetail struct {
@@ -20,6 +21,6 @@ type ArticleDetail struct {
 	Status       int8   `json:"status"`
 	IsTop        int8   `json:"is_top"`
 	IsComment    int8   `json:"is_comment"`
-	CategoryID   int    `json:"category_id"`
+	CategoryID   int64  `json:"category_id"`
 	CategoryName string `json:"category_name"`
 }

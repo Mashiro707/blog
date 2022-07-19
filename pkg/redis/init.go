@@ -3,7 +3,8 @@ package redis
 import (
 	"blog/config"
 	"context"
-	"github.com/go-redis/redis/extra/redisotel/v8"
+	"time"
+
 	"github.com/go-redis/redis/v8"
 )
 
@@ -18,19 +19,15 @@ func (r *Redis) Setup() {
 		Password:     config.RedisConfig.Password,
 		DB:           config.RedisConfig.DB,
 		MinIdleConns: config.RedisConfig.MinIdleConn,
-		DialTimeout:  config.RedisConfig.DialTimeout,
-		ReadTimeout:  config.RedisConfig.ReadTimeout,
-		WriteTimeout: config.RedisConfig.WriteTimeout,
+		DialTimeout:  config.RedisConfig.DialTimeout * time.Second,
+		ReadTimeout:  config.RedisConfig.ReadTimeout * time.Second,
+		WriteTimeout: config.RedisConfig.WriteTimeout * time.Second,
 		PoolSize:     config.RedisConfig.PoolSize,
-		PoolTimeout:  config.RedisConfig.PoolTimeout,
+		PoolTimeout:  config.RedisConfig.PoolTimeout * time.Second,
 	})
 
 	_, err := RedisClient.Ping(context.Background()).Result()
 	if err != nil {
 		panic(err)
-	}
-
-	if config.RedisConfig.EnableTrace {
-		RedisClient.AddHook(redisotel.NewTracingHook())
 	}
 }

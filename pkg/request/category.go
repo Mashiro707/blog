@@ -5,10 +5,10 @@ type CreateCategoryRequest struct {
 }
 
 type UpdateCategoryRequest struct {
-	ID   int    `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
 type DeleteCategoryRequest struct {
-	ID int `json:"id"`
+	ID int64 `json:"id"`
 }
