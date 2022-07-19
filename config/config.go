@@ -1,9 +1,10 @@
 package config
 
 import (
+	"time"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"time"
 )
 
 type Application struct {
@@ -31,8 +32,6 @@ type Redis struct {
 	WriteTimeout time.Duration `yaml:"WriteTimeout"`
 	PoolSize     int           `yaml:"PoolSize"`
 	PoolTimeout  time.Duration `yaml:"PoolTimeout"`
-	// tracing switch
-	EnableTrace bool `yaml:"EnableTrace"`
 }
 
 type Auth struct {
@@ -49,7 +48,7 @@ type Configs struct {
 func loadConfig() (settings Configs) {
 	var config Configs
 	viper.SetConfigType("yml")
-	viper.SetConfigFile("config/config.yml")
+	viper.SetConfigFile("config/dev.yml")
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}

@@ -1,0 +1,22 @@
+application:
+  host: 127.0.0.1
+  port: 8080
+  read_timeout: 5
+  write_timeout: 5
+
+mysql:
+  DSN: root:root@tcp(49.235.76.125:3307)/blog?charset=utf8mb4&parseTime=True&loc=Local
+
+redis:
+  Addr: 49.235.76.125:6380
+  Password: Sl941114.
+  DB: 0
+  MinIdleConn: 4
+  DialTimeout: 5
+  ReadTimeout: 5
+  WriteTimeout: 5
+  PoolSize: 8
+  PoolTimeout: 6
+
+auth:
+  jwt_secret: ksdjfinaldkg
