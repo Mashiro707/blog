@@ -1,13 +1,13 @@
 package response
 
 type UserInfo struct {
-	ID          int64  `json:"id"`
-	UserName    string `json:"user_name"`
-	NickName    string `json:"nick_name"`
-	Email       string `json:"email"`
-	Avatar      string `json:"avatar"`
-	CreatedTime int64  `json:"created_time"`
-	UpdatedTime int64  `json:"updated_time"`
+	ID         int64  `json:"id"`
+	UserName   string `json:"user_name"`
+	NickName   string `json:"nick_name"`
+	Email      string `json:"email"`
+	Avatar     string `json:"avatar"`
+	CreateTime int64  `json:"create_time"`
+	UpdateTime int64  `json:"update_time"`
 }
 
 type UserInfoWithToken struct {

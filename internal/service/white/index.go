@@ -11,29 +11,48 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ArticleIndexList(c *gin.Context, param request.Pagination) ([]response.ArticleIndexList, int64, error) {
+func ArticleIndexList(c *gin.Context, param *request.Pagination) (articleList []response.ArticleList, total int64, err error) {
 	var (
-		total            int64
-		articleModel     model.Article
-		articleIndexList []response.ArticleIndexList
+		articleModel model.Article
+		articleInfo  []model.ArticleInfo
 	)
 
-	if err := mysql.DB.Table(articleModel.TableName()).
+	if err = mysql.DB.Table(articleModel.TableName()).
 		Where("deleted = 0").
 		Count(&total).Error; err != nil {
 		zap.ErrorLog(err)
-		return articleIndexList, total, err
+		return articleList, total, err
 	}
 
-	if err := mysql.DB.Table(articleModel.TableName() + " a").
-		Select("a.id, a.title, a.description, a.is_top, a.category_id, c.id, c.name").
-		Joins("join category c on c.id = a.categoryId").
-		Where("deleted = 0").
+	if err = mysql.DB.Table(articleModel.TableName() + " a").
+		Select("a.id, a.title, a.description, a.is_top, a.category_id, a.create_time, a.update_time, a.category_id, c.name").
+		Joins("join category c on c.id = a.category_id").
+		Where("a.deleted = 0").
+		Order("a.is_top desc").
+		Order("a.id desc").
 		Scopes(common.Paginate(param.PageNum, param.PageSize)).
-		Scan(&articleIndexList).Error; err != nil {
+		Scan(&articleInfo).Error; err != nil {
 		zap.ErrorLog(err)
-		return articleIndexList, total, err
+		return articleList, total, err
+	}
+	for _, a := range articleInfo {
+		articleList = append(articleList, *convArticle(&a))
 	}
 
-	return articleIndexList, total, nil
+	return articleList, total, nil
+}
+
+func convArticle(articleInfo *model.ArticleInfo) *response.ArticleList {
+	return &response.ArticleList{
+		ID:           articleInfo.ID,
+		Title:        articleInfo.Title,
+		Description:  articleInfo.Description,
+		Content:      articleInfo.Content,
+		IsTop:        articleInfo.IsTop,
+		IsComment:    articleInfo.IsComment,
+		CategoryID:   articleInfo.CategoryID,
+		CategoryName: articleInfo.CategoryName,
+		CreateTime:   articleInfo.CreateTime.Unix(),
+		UpdateTime:   articleInfo.UpdateTime.Unix(),
+	}
 }

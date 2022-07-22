@@ -1,6 +1,6 @@
 application:
   host: 127.0.0.1
-  port: 8080
+  port: 7777
   read_timeout: 5
   write_timeout: 5
 
@@ -20,3 +20,9 @@ redis:
 
 auth:
   jwt_secret: ksdjfinaldkg
+
+qiniu:
+  accessKey: viIizti4QN2h-UJ6E1_JugNduMXnYMLmYcXwCmKv
+  secretKey: 2z6zNOChiY7Alu0DC5mPloMaYrGDrP3edoWojENR
+  bucket: mashiro-img
+  server: http://img.mashiro.org.cn/

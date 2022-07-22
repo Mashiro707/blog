@@ -6,6 +6,7 @@ import (
 	"blog/pkg/code"
 	"blog/pkg/msg"
 	"blog/pkg/request"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,7 +53,12 @@ func DeleteCategory(ctx *gin.Context) {
 }
 
 func GetCategoryList(ctx *gin.Context) {
-	res, err := black.GetCategoryList(ctx)
+	var params request.Pagination
+	if err := ctx.ShouldBind(&params); err != nil {
+		app.Error(ctx, code.ParamsNotValid, msg.ParamsNotValid)
+		return
+	}
+	res, err := black.GetCategoryList(ctx, &params)
 	if err != nil {
 		app.Error(ctx, code.DBGetError, msg.DBGetError)
 	}

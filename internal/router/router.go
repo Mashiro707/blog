@@ -2,6 +2,7 @@ package router
 
 import (
 	"blog/internal/api/black"
+	"blog/internal/api/white"
 	"blog/internal/middlewares"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,7 @@ func AdminManagement(g *gin.RouterGroup) {
 
 }
 
-func PageDisplay(g *gin.RouterGroup) {
-
+func BlogShow(g *gin.RouterGroup) {
+	g.POST("/", white.ArticleIndex)
+	g.POST("/article", white.ArticleDetailByID)
 }

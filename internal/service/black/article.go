@@ -15,7 +15,6 @@ func CreateArticle(c *gin.Context, params request.CreateArticle) (err error) {
 	var articleModel model.Article
 	article := model.Article{
 		Title:       params.Title,
-		Cover:       params.Cover,
 		Content:     params.Content,
 		Description: params.Description,
 		IsTop:       params.IsTop,
@@ -34,7 +33,6 @@ func UpdateArticle(c *gin.Context, params request.UpdateArticle) (err error) {
 	var articleModel model.Article
 	articleTagRelationMap := map[string]interface{}{
 		"title":       params.Title,
-		"cover":       params.Cover,
 		"content":     params.Content,
 		"description": params.Description,
 		"is_top":      params.IsTop,
@@ -51,14 +49,12 @@ func UpdateArticle(c *gin.Context, params request.UpdateArticle) (err error) {
 	return nil
 }
 
-func DeleteArticle(c *gin.Context, params request.DeleteArticle) (err error) {
+func DeleteArticle(c *gin.Context, params *request.DeleteArticle) (err error) {
 	var articleModel model.Article
 	// 维护文章表
 	if err = mysql.DB.Table(articleModel.TableName()).
 		Where("id = ? AND deleted = 0", params.ID).
-		Updates(map[string]int{
-			"deleted": 1,
-		}).Error; err != nil {
+		Update("deleted", 1).Error; err != nil {
 		zap.ErrorLog(err)
 		return err
 	}
@@ -70,7 +66,7 @@ func GetArticleByID(param request.GetArticleByID) (articleDetail response.Articl
 		articleModel model.Article
 	)
 	if err = mysql.DB.Table(articleModel.TableName()).
-		Select("article.title, article.cover, article.content, article.description, article.is_top, article.is_comment, article.category_id, category.name category_name").
+		Select("article.id, article.title, article.content, article.description, article.is_top, article.is_comment, article.category_id, category.name category_name").
 		Joins("join category on category.id = article.category_id").
 		Where("article.id = ? AND article.deleted = 0", param.ID).Scan(&articleDetail).Error; err != nil {
 		zap.ErrorLog(err)
@@ -85,7 +81,7 @@ func ArticleList(params *request.Pagination) (articleList []response.ArticleList
 		articleInfoArray []model.ArticleInfo
 	)
 	if err = mysql.DB.Table(articleModel.TableName()).
-		Select("article.id, article.title, article.cover, article.content, article.is_top, article.is_comment, article.category_id, category.name category_name, article.created_time, article.updated_time").
+		Select("article.id, article.title, article.description, article.content, article.is_top, article.is_comment, article.category_id, category.name category_name, article.create_time, article.update_time").
 		Joins("join category on category.id = article.category_id").
 		Scopes(common.Paginate(params.PageNum, params.PageSize)).
 		Where("article.deleted = 0").Scan(&articleInfoArray).Error; err != nil {
@@ -102,12 +98,13 @@ func convArticle(articleInfo *model.ArticleInfo) *response.ArticleList {
 	return &response.ArticleList{
 		ID:           articleInfo.ID,
 		Title:        articleInfo.Title,
-		Status:       articleInfo.Status,
+		Description:  articleInfo.Description,
+		Content:      articleInfo.Content,
 		IsTop:        articleInfo.IsTop,
 		IsComment:    articleInfo.IsComment,
 		CategoryID:   articleInfo.CategoryID,
 		CategoryName: articleInfo.CategoryName,
-		CreatedTime:  articleInfo.CreatedTime.Unix(),
-		UpdatedTime:  articleInfo.UpdatedTime.Unix(),
+		CreateTime:   articleInfo.CreateTime.Unix(),
+		UpdateTime:   articleInfo.UpdateTime.Unix(),
 	}
 }

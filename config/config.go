@@ -38,11 +38,19 @@ type Auth struct {
 	JwtSecret string `yaml:"jwt_secret"`
 }
 
+type Qiniu struct {
+	AccessKey string `yaml:"accessKey"`
+	SecretKey string `yaml:"secretKey"`
+	Bucket    string `yaml:"bucket"`
+	Server    string `yaml:"server"`
+}
+
 type Configs struct {
 	Application Application `yaml:"application"`
 	Mysql       Mysql       `yaml:"mysql"`
 	Redis       Redis       `yaml:"redis"`
 	Auth        Auth        `yaml:"auth"`
+	Qiniu       Qiniu       `yaml:"qiniu"`
 }
 
 func loadConfig() (settings Configs) {
@@ -69,6 +77,7 @@ var (
 	MysqlConfig       = Mysql{}
 	RedisConfig       = Redis{}
 	AuthConfig        = Auth{}
+	QiniuConfig       = Qiniu{}
 )
 
 func init() {
@@ -77,4 +86,5 @@ func init() {
 	MysqlConfig = config.Mysql
 	RedisConfig = config.Redis
 	AuthConfig = config.Auth
+	QiniuConfig = config.Qiniu
 }

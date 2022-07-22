@@ -45,12 +45,12 @@ func UserLogin(c *gin.Context, params request.UserLogin) (response.UserInfoWithT
 
 func conv(user *model.User) *response.UserInfo {
 	return &response.UserInfo{
-		ID:          user.ID,
-		UserName:    user.UserName,
-		NickName:    user.NickName,
-		Email:       user.Email,
-		Avatar:      user.Avatar,
-		CreatedTime: user.CreatedTime.Unix(),
-		UpdatedTime: user.UpdatedTime.Unix(),
+		ID:         user.ID,
+		UserName:   user.UserName,
+		NickName:   user.NickName,
+		Email:      user.Email,
+		Avatar:     user.Avatar,
+		CreateTime: user.CreateTime.Unix(),
+		UpdateTime: user.UpdateTime.Unix(),
 	}
 }

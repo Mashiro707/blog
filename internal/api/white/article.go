@@ -10,17 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ArticleIndex(c *gin.Context) {
-	var param request.Pagination
+func ArticleDetailByID(c *gin.Context) {
+	var param request.GetArticleByID
 	if err := c.ShouldBind(&param); err != nil {
 		app.Error(c, code.ParamsNotValid, msg.ParamsNotValid)
 		return
 	}
 
-	res, total, err := white.ArticleIndexList(c, &param)
+	res, err := white.ArticleDetail(c, &param)
 	if err != nil {
 		app.Error(c, code.DBGetError, msg.DBGetError)
 		return
 	}
-	app.PageOK(c, res, total, param.PageNum, param.PageSize, msg.DBGetSuccess)
+	app.OK(c, msg.DBGetSuccess, res)
 }

@@ -18,4 +18,5 @@ var (
 
 	LoginError = 30009 // 登录失败
 
+	UploadError = 30010 // 上传失败
 )

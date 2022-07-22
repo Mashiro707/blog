@@ -2,9 +2,12 @@ package black
 
 import (
 	"blog/internal/model"
+	common "blog/pkg/common/gorm"
 	"blog/pkg/mysql"
 	"blog/pkg/request"
+	"blog/pkg/response"
 	"blog/pkg/zap"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -60,12 +63,26 @@ func GetCategoryByID(c *gin.Context, params int) (categoryName string, err error
 	return categoryName, nil
 }
 
-func GetCategoryList(ctx *gin.Context) (res []model.Category, err error) {
+func GetCategoryList(ctx *gin.Context, params *request.Pagination) (res []response.Category, err error) {
 	var categoryModel model.Category
+	var category []model.Category
 	if err = mysql.DB.Table(categoryModel.TableName()).
-		Where("deleted = 0").Scan(&res).Error; err != nil {
+		Where("deleted = 0").Scopes(common.Paginate(params.PageNum, params.PageSize)).
+		Scan(&category).Error; err != nil {
 		zap.ErrorLog(err)
 		return res, err
 	}
+	for _, c := range category {
+		res = append(res, *convCategory(&c))
+	}
 	return res, err
+}
+
+func convCategory(category *model.Category) *response.Category {
+	return &response.Category{
+		ID:         category.ID,
+		Name:       category.Name,
+		CreateTime: category.CreateTime.Unix(),
+		UpdateTime: category.UpdateTime.Unix(),
+	}
 }

@@ -36,4 +36,7 @@ var (
 	LoginSuccess = "登录成功"
 
 	LoginError = "登录失败"
+
+	UploadSuccess = "上传成功"
+	UploadError   = "上传失败"
 )

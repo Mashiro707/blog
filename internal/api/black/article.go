@@ -12,7 +12,7 @@ import (
 
 func CreateArticle(c *gin.Context) {
 	var params request.CreateArticle
-	if err := c.ShouldBindJSON(&params); err != nil {
+	if err := c.ShouldBind(&params); err != nil {
 		app.Error(c, code.ParamsNotValid, msg.ParamsNotValid)
 		return
 	}
@@ -25,7 +25,7 @@ func CreateArticle(c *gin.Context) {
 
 func UpdateArticle(c *gin.Context) {
 	var params request.UpdateArticle
-	if err := c.ShouldBindJSON(&params); err != nil {
+	if err := c.ShouldBind(&params); err != nil {
 		app.Error(c, code.ParamsNotValid, msg.ParamsNotValid)
 		return
 	}
@@ -38,11 +38,11 @@ func UpdateArticle(c *gin.Context) {
 
 func DeleteArticle(c *gin.Context) {
 	var params request.DeleteArticle
-	if err := c.ShouldBindJSON(&params); err != nil {
+	if err := c.ShouldBind(&params); err != nil {
 		app.Error(c, code.ParamsNotValid, msg.ParamsNotValid)
 		return
 	}
-	if err := black.DeleteArticle(c, params); err != nil {
+	if err := black.DeleteArticle(c, &params); err != nil {
 		app.Error(c, code.DBDelError, msg.DBDelError)
 		return
 	}
@@ -51,7 +51,7 @@ func DeleteArticle(c *gin.Context) {
 
 func GetArticleByID(c *gin.Context) {
 	var params request.GetArticleByID
-	if err := c.ShouldBindJSON(&params); err != nil {
+	if err := c.ShouldBind(&params); err != nil {
 		app.Error(c, code.ParamsNotValid, msg.ParamsNotValid)
 		return
 	}
@@ -65,7 +65,7 @@ func GetArticleByID(c *gin.Context) {
 
 func ArticleList(c *gin.Context) {
 	var params request.Pagination
-	if err := c.ShouldBindJSON(&params); err != nil {
+	if err := c.ShouldBind(&params); err != nil {
 		app.Error(c, code.ParamsNotValid, msg.ParamsNotValid)
 		return
 	}

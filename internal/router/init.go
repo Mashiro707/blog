@@ -12,8 +12,8 @@ func InitRouter() *gin.Engine {
 	g := r.Group("/api", middlewares.CORS())
 	// admin management
 	AdminManagement(g)
-	// page display
-	PageDisplay(g)
+	// blog show
+	BlogShow(g)
 	return r
 }
 func pingRouter(r *gin.Engine) {
